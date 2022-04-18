@@ -1,6 +1,7 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SchedulerRegistry } from '@nestjs/schedule';
+import { CronJob } from 'cron';
 import { lastValueFrom, map } from 'rxjs';
 import { Director } from 'src/tmdb/dto/director.dto';
 import { Genre } from 'src/tmdb/dto/genre.dto';
@@ -9,7 +10,7 @@ import { Movie } from 'src/tmdb/dto/movie.dto';
 import { Person } from 'src/tmdb/dto/person.dto';
 import { DatabaseService } from 'src/tmdb/services/database.service';
 import { TmdbService } from 'src/tmdb/services/tmdb.service';
-import { CRON_INTERVAL, TOP_MOVIES_SIZE } from 'src/utils/constants';
+import { CRON_STRING, TOP_MOVIES_SIZE } from 'src/utils/constants';
 import { ApiCallsService } from '../services/api-calls.service';
 
 type FetchedData = {
@@ -33,12 +34,16 @@ export class TasksService implements OnModuleInit {
   ) { }
 
   onModuleInit() {
-    this.handleInterval()
-    const interval = setInterval(() => this.handleInterval, this.config.get(CRON_INTERVAL));
-    this.schedulerRegistry.addInterval('sync-database', interval);
+
+    // sync on app start
+    this.handleCron()
+
+    const job = new CronJob(this.config.get(CRON_STRING),() => this.handleCron());
+    this.schedulerRegistry.addCronJob('sync-database', job)
+    job.start()
   }
   private readonly logger = new Logger('TmdbTasksService');
-  async handleInterval() {
+  async handleCron() {
     const chunkArray = (arr, size) =>
       arr.length > size
         ? [arr.slice(0, size), ...chunkArray(arr.slice(size), size)]

@@ -6,7 +6,7 @@ export const connectionFactory = {
     provide: CONNECTION,
     useFactory:  (optionsProvider: ConfigService, manager: PoolManager) => {
         const options = optionsProvider.get(DATABASE_CONFIG);
-        return manager.GetCreateIfNotExistClient(options);
+        return manager.getCreateIfNotExistClient(options);
     },
     inject: [ConfigService, PoolManager],
 };
