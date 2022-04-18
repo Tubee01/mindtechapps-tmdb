@@ -1,0 +1,7 @@
+export const CONNECTION = 'CONNECTION'
+export const DATABASE_CONFIG = 'DATABASE_CONFIG'
+export const PORT = 'PORT'
+export const API_KEY = 'API_KEY'
+export const API_URL = 'API_URL'
+export const CRON_INTERVAL = 'CRON_INTERVAL'
+export const TOP_MOVIES_SIZE = 'TOP_MOVIES_SIZE'

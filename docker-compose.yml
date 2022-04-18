@@ -1,0 +1,41 @@
+version: "3.8"
+
+volumes:
+  db:
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8080:8080"
+    restart: on-failure
+    depends_on:
+      - db
+    links: 
+        - db
+  db:
+    image: postgres
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "pg_isready",
+          "-q",
+          "-d",
+          "db",
+          "-U",
+          "admin",
+          "-P",
+          "secret"
+        ]
+      timeout: 45s
+      interval: 10s
+      retries: 10
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: secret
+      # POSTGRES_COLLATION: Hungarian_CI_AS
+    volumes:
+      - ./db:/docker-entrypoint-initdb.d/
+    ports:
+      - "5432:5432"

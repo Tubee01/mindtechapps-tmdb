@@ -1,0 +1,31 @@
+# pull the Node.js Docker image
+FROM node:16 as builder
+# change working directory
+WORKDIR /home/node/backend
+# copy the package.json files from local machine to the workdir in container
+COPY package*.json ./
+
+# run npm install in our local machine
+RUN npm ci
+
+# copy the generated modules and all other files to the container
+COPY . .
+# build the application
+RUN npm run build
+
+### Serve Step
+# pull the Node.js Docker image
+FROM node:16
+
+# change working directory
+WORKDIR /home/node/backend
+
+# copy files from previous step
+COPY --from=builder /home/node/backend/node_modules ./node_modules
+COPY --from=builder /home/node/backend/dist ./dist
+COPY --from=builder /home/node/backend/package*.json ./
+COPY --from=builder /home/node/backend/tsconfig*.json ./
+
+# the command that starts our app
+CMD ["node", "dist/main.js"]
+
